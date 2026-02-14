@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBLRush | Apostas Online</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111315;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .sblr-primary {
+            background-color: #2b6cb0;
+        }
+        
+        .sblr-secondary {
+            background-color: #181b21;
+        }
+        
+        .sblr-tertiary {
+            background-color: #22272e;
+        }
+        
+        .sblr-accent {
+            color: #2b6cb0;
+        }
+        
+        .sblr-btn {
+            background-color: #2b6cb0;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .sblr-btn:hover {
+            background-color: #2c5282;
+            transform: translateY(-2px);
+        }
+        
+        .sblr-btn:disabled {
+            background-color: #4a5568;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .game-card {
+            transition: transform 0.2s;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(43, 108, 176, 0.2);
+        }
+        
+        .crash-chart {
+            height: 200px;
+            background: linear-gradient(90deg, rgba(43, 108, 176, 0.1) 0%, rgba(43, 108, 176, 0.05) 100%);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #374151;
+        }
+        
+        .crash-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+            transform-origin: left bottom;
+            transition: all 0.1s ease;
+            border-radius: 2px;
+        }
+        
+        .crash-rocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            font-size: 24px;
+            transition: all 0.1s ease;
+            transform-origin: center;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.8; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        .live-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        .mines-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .mine-cell {
+            width: 50px;
+            height: 50px;
+            background: #374151;
+            border: 2px solid #4b5563;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+            position: relative;
+        }
+        
+        .mine-cell:hover:not(.revealed):not(.mine) {
+            background: #4b5563;
+            border-color: #2b6cb0;
+            transform: scale(1.05);
+        }
+        
+        .mine-cell.revealed {
+            background: #059669;
+            border-color: #10b981;
+            animation: revealGem 0.5s ease;
+        }
+        
+        .mine-cell.mine {
+            background: #dc2626;
+            border-color: #ef4444;
+            animation: explodeMine 0.5s ease;
+        }
+        
+        @keyframes revealGem {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes explodeMine {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(0.9); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .double-wheel {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #dc2626 0deg 120deg,
+                #1f2937 120deg 240deg,
+                #dc2626 240deg 360deg
+            );
+            position: relative;
+            margin: 0 auto;
+            transition: transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 4px solid #374151;
+        }
+        
+        .double-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 24px solid #ffffff;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 120px;
+        }
+        
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #ffffff, #e5e7eb);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #000;
+            font-weight: bold;
+            margin: 0 10px;
+            transition: transform 0.5s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 2px solid #d1d5db;
+        }
+        
+        .dice.rolling {
+            animation: roll3d 1s ease-in-out;
+        }
+        
+        @keyframes roll3d {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            25% { transform: rotateX(90deg) rotateY(90deg); }
+            50% { transform: rotateX(180deg) rotateY(180deg); }
+            75% { transform: rotateX(270deg) rotateY(270deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+        
+        .game-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .game-modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #22272e;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            border: 2px solid #374151;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 28px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            color: #ef4444;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #22272e;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #2b6cb0;
+            border-radius: 4px;
+        }
+        
+        .bet-input {
+            background: #374151;
+            border: 2px solid #4b5563;
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            width: 100%;
+            margin-bottom: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .bet-input:focus {
+            outline: none;
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+        }
+        
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #374151;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #4b5563;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            border-color: #2b6cb0;
+            transform: translateY(-2px);
+        }
+        
+        .plinko-board {
+            width: 320px;
+            height: 420px;
+            background: linear-gradient(180deg, #374151, #4b5563);
+            border-radius: 16px;
+            position: relative;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 3px solid #6b7280;
+        }
+        
+        .plinko-peg {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .plinko-ball {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle, #3b82f6, #1d4ed8);
+            border-radius: 50%;
+            transition: all 0.1s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+        
+        .plinko-slots {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            display: flex;
+        }
+        
+        .plinko-slot {
+            flex: 1;
+            background: linear-gradient(180deg, #4b5563, #374151);
+            border: 1px solid #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        
+        .plinko-slot:nth-child(6) {
+            background: linear-gradient(180deg, #dc2626, #991b1b);
+            color: #ffffff;
+        }
+
+        /* Withdrawal System Styles */
+        .withdrawal-form {
+            background: #374151;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #4b5563;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: #4b5563;
+            border: 2px solid #6b7280;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            background: #4b5563;
+            border: 2px solid #6b7280;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #2b6cb0;
+        }
+
+        .withdrawal-history {
+            background: #374151;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #4b5563;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #4b5563;
+            transition: background-color 0.3s ease;
+        }
+
+        .history-item:hover {
+            background-color: rgba(75, 85, 99, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 0 -12px;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-pending {
+            color: #fbbf24;
+        }
+
+        .status-completed {
+            color: #10b981;
+        }
+
+        .status-failed {
+            color: #ef4444;
+        }
+
+        .quick-amount {
+            display: inline-block;
+            padding: 10px 16px;
+            margin: 4px;
+            background: #4b5563;
+            border: 2px solid #6b7280;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .quick-amount:hover {
+            border-color: #2b6cb0;
+            background: #374151;
+            transform: translateY(-2px);
+        }
+
+        .quick-amount.selected {
+            border-color: #2b6cb0;
+            background: #2b6cb0;
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border: 2px solid transparent;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #34d399;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: #f87171;
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-color: #fbbf24;
+        }
+
+        /* Enhanced animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-content {
+            animation: slideInUp 0.3s ease;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                padding: 16px;
+            }
+            
+            .game-stats {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .plinko-board {
+                width: 280px;
+                height: 380px;
+            }
+            
+            .mines-grid {
+                max-width: 250px;
+            }
+            
+            .mine-cell {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+        }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            border: 2px solid #374151;
+            border-top: 2px solid #2b6cb0;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="sblr-secondary fixed top-0 w-full z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-10">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 mr-2 rounded-full sblr-primary flex items-center justify-center">
+                        <i class="fas fa-rocket text-white"></i>
+                    </div>
+                    <span class="text-2xl font-bold sblr-accent">SBLRush</span>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="font-medium hover:text-blue-400 transition">Cassino</a>
+                    <a href="#crash" class="font-medium hover:text-blue-400 transition">Crash</a>
+                    <a href="#double" class="font-medium hover:text-blue-400 transition">Double</a>
+                    <a href="#mines" class="font-medium hover:text-blue-400 transition">Mines</a>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-2 bg-gray-700 px-3 py-2 rounded-md">
+                    <i class="fas fa-wallet text-yellow-400"></i>
+                    <span id="balance">R$ 1.000,00</span>
+                </div>
+                <button class="sblr-btn px-4 py-2 rounded-md text-sm hidden md:block" onclick="openDepositModal()">Depositar</button>
+                <button class="sblr-btn px-4 py-2 rounded-md text-sm hidden md:block" onclick="openWithdrawalModal()">Sacar</button>
+                <button class="sblr-btn px-4 py-2 rounded-md text-sm" onclick="openLoginModal()" id="auth-btn">Entrar</button>
+                <button class="text-gray-300 hover:text-white md:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-10 px-4">
+        <!-- Hero Section -->
+        <section class="max-w-7xl mx-auto sblr-tertiary rounded-xl p-6 mb-8">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-6 md:mb-0 md:pr-6">
+                    <h1 class="text-3xl md:text-5xl font-bold mb-4">Aposte e multiplique seu dinheiro</h1>
+                    <p class="text-gray-300 mb-6">Jogue os melhores jogos de cassino online e tenha a chance de ganhar grandes prêmios!</p>
+                    <div class="flex space-x-4">
+                        <button class="sblr-btn px-6 py-3 rounded-md font-semibold" onclick="scrollToGames()">Comece agora</button>
+                        <button class="border border-gray-600 px-6 py-3 rounded-md font-semibold hover:bg-gray-700 transition" onclick="showTutorial()">Como jogar</button>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg p-8 text-center">
+                        <i class="fas fa-chart-line text-6xl mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-2">Ganhos em Tempo Real</h3>
+                        <p class="text-lg">Multiplique seus ganhos até 1000x!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Crash Game Section -->
+        <section id="crash" class="max-w-7xl mx-auto mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold">SBLRush Crash</h2>
+                <div class="flex items-center space-x-2">
+                    <span class="px-3 py-1 bg-red-600 text-white text-xs rounded-full flex items-center live-badge">
+                        <span class="w-2 h-2 bg-white rounded-full mr-2"></span>
+                        AO VIVO
+                    </span>
+                    <span class="px-3 py-1 bg-gray-700 text-white text-xs rounded-full" id="crash-players">763 jogadores</span>
+                </div>
+            </div>
+            
+            <div class="sblr-tertiary rounded-xl p-6 mb-6">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-2/3 mb-6 md:mb-0 md:pr-6">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Último valor</p>
+                                <p class="text-2xl font-bold sblr-accent" id="crash-last">3.24x</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Multiplicador atual</p>
+                                <p class="text-2xl font-bold" id="crash-current">1.00x</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-sm">Próximo jogo</p>
+                                <p class="text-2xl font-bold" id="crash-timer">00:12</p>
+                            </div>
+                        </div>
+                        <div class="crash-chart mb-6" id="crash-chart">
+                            <div class="crash-line" id="crash-line"></div>
+                            <div class="crash-rocket" id="crash-rocket">🚀</div>
+                            <div class="absolute top-4 left-4 text-4xl font-bold" id="crash-multiplier">1.00x</div>
+                            <div class="absolute top-4 right-4 text-sm text-gray-400" id="crash-status">Aguardando...</div>
+                        </div>
+                        <div class="flex space-x-4 mb-4">
+                            <input type="number" class="bet-input flex-1" placeholder="Valor da aposta" id="crash-bet" value="10" min="1" max="1000">
+                            <input type="number" class="bet-input flex-1" placeholder="Auto cash-out" id="crash-cashout" value="2.00" min="1.01" step="0.01">
+                        </div>
+                        <div class="flex space-x-4">
+                            <button class="sblr-btn px-4 py-2 rounded-md flex-1" id="crash-bet-btn" onclick="placeCrashBet()">Apostar</button>
+                            <button class="border border-gray-600 px-4 py-2 rounded-md hover:bg-gray-700 transition flex-1" onclick="showCrashHistory()">Histórico</button>
+                        </div>
+                    </div>
+                    
+                    <div class="md:w-1/3">
+                        <div class="bg-gray-800 rounded-lg p-4">
+                            <h3 class="font-bold mb-4">Top 5 apostas</h3>
+                            <div class="space-y-3" id="crash-leaderboard">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 rounded-full mr-2 bg-blue-500 flex items-center justify-center text-xs">U</div>
+                                        <span class="text-sm">Usuário****</span>
+                                    </div>
+                                    <span class="text-green-400 font-bold">R$ 2.418,00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 rounded-full mr-2 bg-green-500 flex items-center justify-center text-xs">U</div>
+                                        <span class="text-sm">Usuário****</span>
+                                    </div>
+                                    <span class="text-green-400 font-bold">R$ 1.876,50</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 rounded-full mr-2 bg-purple-500 flex items-center justify-center text-xs">U</div>
+                                        <span class="text-sm">Usuário****</span>
+                                    </div>
+                                    <span class="text-green-400 font-bold">R$ 1.432,90</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 rounded-full mr-2 bg-red-500 flex items-center justify-center text-xs">U</div>
+                                        <span class="text-sm">Usuário****</span>
+                                    </div>
+                                    <span class="text-green-400 font-bold">R$ 987,25</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 rounded-full mr-2 bg-yellow-500 flex items-center justify-center text-xs">U</div>
+                                        <span class="text-sm">Usuário****</span>
+                                    </div>
+                                    <span class="text-green-400 font-bold">R$ 756,80</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Games Section -->
+        <section id="games" class="max-w-7xl mx-auto mb-8">
+            <h2 class="text-2xl font-bold mb-6">Jogos Populares</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                <!-- Game Card 1 - Double -->
+                <div class="game-card sblr-tertiary rounded-lg overflow-hidden cursor-pointer" onclick="openGame('double')">
+                    <div class="relative">
+                        <div class="w-full h-32 bg-gradient-to-br from-red-600 to-black flex items-center justify-center">
+                            <i class="fas fa-circle text-4xl text-white"></i>
+                        </div>
+                        <span class="absolute top-2 right-2 px-2 py-1 bg-black bg-opacity-50 text-xs rounded">1.2k jogadores</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold mb-1">Double</h3>
+                        <p class="text-gray-400 text-sm">Vermelho ou preto</p>
+                    </div>
+                </div>
+                
+                <!-- Game Card 2 - Mines -->
+                <div class="game-card sblr-tertiary rounded-lg overflow-hidden cursor-pointer" onclick="openGame('mines')">
+                    <div class="relative">
+                        <div class="w-full h-32 bg-gradient-to-br from-green-600 to-emerald-800 flex items-center justify-center">
+                            <i class="fas fa-gem text-4xl text-white"></i>
+                        </div>
+                        <span class="absolute top-2 right-2 px-2 py-1 bg-black bg-opacity-50 text-xs rounded">856 jogadores</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold mb-1">Mines</h3>
+                        <p class="text-gray-400 text-sm">Encontre os diamantes</p>
+                    </div>
+                </div>
+                
+                <!-- Game Card 3 - Crash -->
+                <div class="game-card sblr-tertiary rounded-lg overflow-hidden cursor-pointer" onclick="scrollToCrash()">
+                    <div class="relative">
+                        <div class="w-full h-32 bg-gradient-to-br from-blue-600 to-purple-800 flex items-center justify-center">
+                            <i class="fas fa-rocket text-4xl text-white"></i>
+                        </div>
+                        <span class="absolute top-2 right-2 px-2 py-1 bg-black bg-opacity-50 text-xs rounded">2.1k jogadores</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold mb-1">Crash</h3>
+                        <p class="text-gray-400 text-sm">Retire antes do crash</p>
+                    </div>
+                </div>
+                
+                <!-- Game Card 4 - Dice -->
+                <div class="game-card sblr-tertiary rounded-lg overflow-hidden cursor-pointer" onclick="openGame('dice')">
+                    <div class="relative">
+                        <div class="w-full h-32 bg-gradient-to-br from-yellow-600 to-orange-800 flex items-center justify-center">
+                            <i class="fas fa-dice text-4xl text-white"></i>
+                        </div>
+                        <span class="absolute top-2 right-2 px-2 py-1 bg-black bg-opacity-50 text-xs rounded">976 jogadores</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold mb-1">Dice</h3>
+                        <p class="text-gray-400 text-sm">Acima ou abaixo</p>
+                    </div>
+                </div>
+                
+                <!-- Game Card 5 - Plinko -->
+                <div class="game-card sblr-tertiary rounded-lg overflow-hidden cursor-pointer" onclick="openGame('plinko')">
+                    <div class="relative">
+                        <div class="w-full h-32 bg-gradient-to-br from-pink-600 to-indigo-800 flex items-center justify-center">
+                            <i class="fas fa-circle text-4xl text-white"></i>
+                        </div>
+                        <span class="absolute top-2 right-2 px-2 py-1 bg-black bg-opacity-50 text-xs rounded">1572 jogadores</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold mb-1">Plinko</h3>
+                        <p class="text-gray-400 text-sm">Clássico jogo de queda</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Promotions Section -->
+        <section class="max-w-7xl mx-auto mb-8">
+            <h2 class="text-2xl font-bold mb-6">Promoções</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="sblr-tertiary rounded-xl overflow-hidden">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-1/3 sblr-primary p-6 text-center flex flex-col justify-center">
+                            <i class="fas fa-gift text-5xl mb-4"></i>
+                            <h3 class="text-xl font-bold">Bônus de Cadastro</h3>
+                        </div>
+                        <div class="md:w-2/3 p-6">
+                            <h3 class="text-xl font-bold mb-2">Ganhe até R$1000</h3>
+                            <p class="text-gray-300 mb-4">Faça seu primeiro depósito e ganhe um bônus de até 100%</p>
+                            <button class="sblr-btn px-4 py-2 rounded-md text-sm" onclick="showPromotion('bonus')">Participar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sblr-tertiary rounded-xl overflow-hidden">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-1/3 sblr-primary p-6 text-center flex flex-col justify-center">
+                            <i class="fas fa-trophy text-5xl mb-4"></i>
+                            <h3 class="text-xl font-bold">Ranking</h3>
+                        </div>
+                        <div class="md:w-2/3 p-6">
+                            <h3 class="text-xl font-bold mb-2">Subir no Ranking</h3>
+                            <p class="text-gray-300 mb-4">Jogue e acumule pontos para ganhar prêmios semanais</p>
+                            <button class="sblr-btn px-4 py-2 rounded-md text-sm" onclick="showRanking()">Ver ranking</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="game-modal">
+        <div class="modal-content relative">
+            <button class="close-modal" onclick="closeModal('login-modal')">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Entrar na sua conta</h2>
+            
+            <div class="form-group">
+                <label class="form-label">CPF:</label>
+                <input type="text" class="form-input" id="login-cpf" placeholder="000.000.000-00" maxlength="14">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Senha:</label>
+                <input type="password" class="form-input" id="login-password" placeholder="Digite sua senha">
+            </div>
+            
+            <button class="sblr-btn px-6 py-3 rounded-md w-full mb-4" onclick="performLogin()">Entrar</button>
+            
+            <div class="text-center">
+                <p class="text-gray-400 text-sm">Não tem conta? <a href="#" class="sblr-accent hover:underline">Cadastre-se</a></p>
+                <p class="text-gray-400 text-sm mt-2">Para teste: CPF: 12345678900, Senha: senha123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="deposit-modal" class="game-modal">
+        <div class="modal-content relative">
+            <button class="close-modal" onclick="closeModal('deposit-modal')">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Fazer Depósito</h2>
+            
+            <div class="withdrawal-form">
+                <div class="form-group">
+                    <label class="form-label">Método de Pagamento:</label>
+                    <select class="form-select" id="deposit-method">
+                        <option value="pix">PIX</option>
+                        <option value="credit">Cartão de Crédito</option>
+                        <option value="debit">Cartão de Débito</option>
+                        <option value="bank">Transferência Bancária</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Valor do Depósito:</label>
+                    <input type="number" class="form-input" id="deposit-amount" placeholder="R$ 0,00" min="10" max="10000">
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-sm text-gray-400 mb-2">Valores rápidos:</p>
+                    <div class="flex flex-wrap">
+                        <span class="quick-amount" onclick="setDepositAmount(50)">R$ 50</span>
+                        <span class="quick-amount" onclick="setDepositAmount(100)">R$ 100</span>
+                        <span class="quick-amount" onclick="setDepositAmount(200)">R$ 200</span>
+                        <span class="quick-amount" onclick="setDepositAmount(500)">R$ 500</span>
+                    </div>
+                </div>
+                
+                <button class="sblr-btn px-6 py-3 rounded-md w-full" onclick="processDeposit()">Confirmar Depósito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal Modal -->
+    <div id="withdrawal-modal" class="game-modal">
+        <div class="modal-content relative">
+            <button class="close-modal" onclick="closeModal('withdrawal-modal')">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Sistema de Saque</h2>
+            
+            <div class="withdrawal-form">
+                <div class="form-group">
+                    <label class="form-label">Saldo Disponível:</label>
+                    <div class="bg-gray-600 p-3 rounded-md text-center">
+                        <span class="text-2xl font-bold text-green-400" id="withdrawal-balance">R$ 1.000,00</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Método de Saque:</label>
+                    <select class="form-select" id="withdrawal-method" onchange="updateWithdrawalMethod()">
+                        <option value="pix">PIX (Instantâneo)</option>
+                        <option value="bank">Transferência Bancária (1-2 dias úteis)</option>
+                        <option value="crypto">Criptomoeda (5-30 min)</option>
+                    </select>
+                </div>
+                
+                <div id="pix-fields" class="withdrawal-method-fields">
+                    <div class="form-group">
+                        <label class="form-label">Chave PIX:</label>
+                        <input type="text" class="form-input" id="pix-key" placeholder="CPF, e-mail, telefone ou chave aleatória">
+                    </div>
+                </div>
+                
+                <div id="bank-fields" class="withdrawal-method-fields" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Banco:</label>
+                        <input type="text" class="form-input" id="bank-name" placeholder="Nome do banco">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Agência:</label>
+                        <input type="text" class="form-input" id="bank-agency" placeholder="0000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Conta:</label>
+                        <input type="text" class="form-input" id="bank-account" placeholder="00000-0">
+                    </div>
+                </div>
+                
+                <div id="crypto-fields" class="withdrawal-method-fields" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Criptomoeda:</label>
+                        <select class="form-select" id="crypto-type">
+                            <option value="btc">Bitcoin (BTC)</option>
+                            <option value="eth">Ethereum (ETH)</option>
+                            <option value="usdt">Tether (USDT)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Endereço da Carteira:</label>
+                        <input type="text" class="form-input" id="crypto-address" placeholder="Endereço da carteira">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Valor do Saque:</label>
+                    <input type="number" class="form-input" id="withdrawal-amount" placeholder="R$ 0,00" min="20" max="10000" oninput="calculateWithdrawalFee()">
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-sm text-gray-400 mb-2">Valores rápidos:</p>
+                    <div class="flex flex-wrap">
+                        <span class="quick-amount" onclick="setWithdrawalAmount(50)">R$ 50</span>
+                        <span class="quick-amount" onclick="setWithdrawalAmount(100)">R$ 100</span>
+                        <span class="quick-amount" onclick="setWithdrawalAmount(500)">R$ 500</span>
+                        <span class="quick-amount" onclick="setWithdrawalAmount(1000)">R$ 1.000</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-600 p-3 rounded-md mb-4">
+                    <div class="flex justify-between text-sm">
+                        <span>Valor solicitado:</span>
+                        <span id="withdrawal-requested">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>Taxa de processamento:</span>
+                        <span id="withdrawal-fee">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between font-bold border-t border-gray-500 pt-2 mt-2">
+                        <span>Valor a receber:</span>
+                        <span id="withdrawal-net" class="text-green-400">R$ 0,00</span>
+                    </div>
+                </div>
+                
+                <button class="sblr-btn px-6 py-3 rounded-md w-full" id="withdrawal-btn" onclick="processWithdrawal()" disabled>Solicitar Saque</button>
+                
+                <div class="text-center mt-4">
+                    <p class="text-xs text-gray-400">
+                        • Valor mínimo: R$ 20,00<br>
+                        • Valor máximo: R$ 10.000,00 por transação<br>
+                        • Limite diário: R$ 50.000,00
+                    </p>
+                </div>
+            </div>
+            
+            <div class="withdrawal-history">
+                <h3 class="text-lg font-bold mb-4">Histórico de Saques</h3>
+                <div id="withdrawal-history-list">
+                    <div class="history-item">
+                        <div>
+                            <div class="font-medium">R$ 250,00</div>
+                            <div class="text-sm text-gray-400">PIX - 15/01/2024 14:30</div>
+                        </div>
+                        <div class="status-completed">
+                            <i class="fas fa-check-circle"></i> Concluído
+                        </div>
+                    </div>
+                    <div class="history-item">
+                        <div>
+                            <div class="font-medium">R$ 500,00</div>
+                            <div class="text-sm text-gray-400">Transferência - 12/01/2024 09:15</div>
+                        </div>
+                        <div class="status-pending">
+                            <i class="fas fa-clock"></i> Processando
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Modals -->
+    
+    <!-- Double Game Modal -->
+    <div id="double-modal" class="game-modal">
+        <div class="modal-content relative">
+            <button class="close-modal" onclick="closeGame()">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Double - Previsão de Cores</h2>
+            
+            <div class="game-stats">
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Última cor</div>
+                    <div class="text-lg font-bold" id="double-last-color">🔴</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Sequência</div>
+                    <div class="text-lg font-bold" id="double-sequence">3</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Próximo em</div>
+                    <div class="text-lg font-bold" id="double-timer">15s</div>
+                </div>
+            </div>
+            
+            <div class="double-wheel mb-6" id="double-wheel">
+                <div class="double-pointer"></div>
+            </div>
+            
+            <div class="flex space-x-4 mb-4">
+                <button class="flex-1 bg-red-600 hover:bg-red-700 px-4 py-3 rounded-md font-bold transition" onclick="placeBet('red')" id="red-bet-btn">
+                    🔴 Vermelho (2x)
+                </button>
+                <button class="flex-1 bg-gray-600 hover:bg-gray-700 px-4 py-3 rounded-md font-bold transition" onclick="placeBet('black')" id="black-bet-btn">
+                    ⚫ Preto (2x)
+                </button>
+            </div>
+            
+            <input type="number" class="bet-input" placeholder="Valor da aposta" id="double-bet" value="10" min="1" max="1000">
+            <div class="text-center">
+                <p class="text-sm text-gray-400">Saldo: <span id="double-balance">R$ 1.000,00</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mines Game Modal -->
+    <div id="mines-modal" class="game-modal">
+        <div class="modal-content relative">
+            <button class="close-modal" onclick="closeGame()">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Mines - Encontre os Diamantes</h2>
+            
+            <div class="game-stats">
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Minas</div>
+                    <div class="text-lg font-bold" id="mines-count">3</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Multiplicador</div>
+                    <div class="text-lg font-bold" id="mines-multiplier">1.00x</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Ganho potencial</div>
+                    <div class="text-lg font-bold" id="mines-potential">R$ 10,00</div>
+                </div>
+            </div>
+            
+            <div class="mines-grid mb-6" id="mines-grid">
+                <!-- Grid será gerada pelo JavaScript -->
+            </div>
+            
+            <div class="form-group mb-4">
+                <label class="form-label">Número de minas:</label>
+                <select class="form-select" id="mines-difficulty" onchange="updateMinesDifficulty()">
+                    <option value="3">3 minas (Fácil)</option>
+                    <option value="5">5 minas (Médio)</option>
+                    <option value="8">8 minas (Difícil)</option>
+                    <option value="12">12 minas (Extremo)</option>
+                </select>
+            </div>
+            
+            <input type="number" class="bet-input" placeholder="Valor da aposta" id="mines-bet" value="10" min="1" max="1000">
+            <div class="flex space-x-4">
+                <button class="sblr-btn px-4 py-2 rounded-md flex-1" id="mines-start-btn" onclick="startMines()">Iniciar Jogo</button>
+                <button class="border border-gray-600 px-4 py-2 rounded-md hover:bg-gray-700 transition flex-1" id="mines-cashout-btn" onclick="cashoutMines()" style="display: none;">Retirar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dice Game Modal -->
+    <div id="dice-modal" class="game-modal">
+        <div class="modal-content relative">
+            <button class="close-modal" onclick="closeGame()">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Dice - Acima ou Abaixo</h2>
+            
+            <div class="game-stats">
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Último resultado</div>
+                    <div class="text-lg font-bold" id="dice-last">50</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Multiplicador</div>
+                    <div class="text-lg font-bold" id="dice-multiplier">2.00x</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Chance</div>
+                    <div class="text-lg font-bold" id="dice-chance">50%</div>
+                </div>
+            </div>
+            
+            <div class="dice-container mb-6">
+                <div class="dice" id="dice-result">?</div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Número alvo (1-99):</label>
+                <input type="range" min="1" max="99" value="50" class="w-full" id="dice-target" oninput="updateDiceStats()">
+                <div class="flex justify-between text-sm text-gray-400 mt-1">
+                    <span>1</span>
+                    <span id="dice-target-value">50</span>
+                    <span>99</span>
+                </div>
+            </div>
+            
+            <input type="number" class="bet-input" placeholder="Valor da aposta" id="dice-bet" value="10" min="1" max="1000">
+            <div class="flex space-x-4">
+                <button class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md flex-1 font-bold transition" onclick="rollDice('over')" id="dice-over-btn">
+                    Acima de <span id="dice-target-display">50</span>
+                </button>
+                <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md flex-1 font-bold transition" onclick="rollDice('under')" id="dice-under-btn">
+                    Abaixo de <span id="dice-target-display2">50</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plinko Game Modal -->
+    <div id="plinko-modal" class="game-modal">
+        <div class="modal-content relative">
+            <button class="close-modal" onclick="closeGame()">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Plinko - Jogo de Queda</h2>
+            
+            <div class="game-stats">
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Bolas restantes</div>
+                    <div class="text-lg font-bold" id="plinko-balls">10</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Multiplicador máx</div>
+                    <div class="text-lg font-bold">1000x</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-sm text-gray-400">Ganho total</div>
+                    <div class="text-lg font-bold" id="plinko-total">R$ 0,00</div>
+                </div>
+            </div>
+            
+            <div class="plinko-board mb-6" id="plinko-board">
+                <div class="plinko-slots">
+                    <div class="plinko-slot">0.2x</div>
+                    <div class="plinko-slot">0.5x</div>
+                    <div class="plinko-slot">1x</div>
+                    <div class="plinko-slot">2x</div>
+                    <div class="plinko-slot">5x</div>
+                    <div class="plinko-slot">10x</div>
+                    <div class="plinko-slot">5x</div>
+                    <div class="plinko-slot">2x</div>
+                    <div class="plinko-slot">1x</div>
+                    <div class="plinko-slot">0.5x</div>
+                    <div class="plinko-slot">0.2x</div>
+                </div>
+            </div>
+            
+            <input type="number" class="bet-input" placeholder="Valor por bola" id="plinko-bet" value="1" min="1" max="100">
+            <button class="sblr-btn px-4 py-2 rounded-md w-full" onclick="dropPlinko()" id="plinko-drop-btn">Soltar Bola</button>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorial-modal" class="game-modal">
+        <div class="modal-content relative">
+            <button class="close-modal" onclick="closeTutorial()">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Como Jogar</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold mb-2">🚀 Crash</h3>
+                    <p class="text-gray-300">Aposte e retire antes do crash! O multiplicador cresce até explodir. Retire no momento certo para multiplicar sua aposta.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-2">🔴 Double</h3>
+                    <p class="text-gray-300">Preveja se a próxima cor será vermelha ou preta. Acerte e duplique sua aposta!</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-2">💎 Mines</h3>
+                    <p class="text-gray-300">Encontre diamantes evitando as minas. Cada diamante aumenta o multiplicador. Retire quando quiser!</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-2">🎲 Dice</h3>
+                    <p class="text-gray-300">Escolha um número e aposte se o resultado será acima ou abaixo. Quanto mais arriscado, maior o prêmio!</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-2">⚪ Plinko</h3>
+                    <p class="text-gray-300">Solte a bola e veja onde ela cai! Diferentes slots têm diferentes multiplicadores.</p>
+                </div>
+            </div>
+            
+            <button class="sblr-btn px-6 py-3 rounded-md w-full mt-6" onclick="closeTutorial()">Entendi!</button>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Global variables
+        let balance = 1000;
+        let crashMultiplier = 1.0;
+        let crashRunning = false;
+        let crashBetActive = false;
+        let crashTimer = 15;
+        let crashGameState = 'waiting'; // waiting, running, crashed
+        let minesGame = null;
+        let doubleTimer = 15;
+        let doubleGameState = 'waiting'; // waiting, spinning, result
+        let isLoggedIn = false;
+        let withdrawalHistory = [];
+        let currentUser = null;
+        let gameHistory = {
+            crash: [],
+            double: [],
+            mines: [],
+            dice: [],
+            plinko: []
+        };
+        
+        // Notification system
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+        
+        // Update balance display
+        function updateBalance() {
+            const formattedBalance = `R$ ${balance.toFixed(2).replace('.', ',')}`;
+            document.getElementById('balance').textContent = formattedBalance;
+            
+            const doubleBalance = document.getElementById('double-balance');
+            if (doubleBalance) {
+                doubleBalance.textContent = formattedBalance;
+            }
+            
+            const withdrawalBalance = document.getElementById('withdrawal-balance');
+            if (withdrawalBalance) {
+                withdrawalBalance.textContent = formattedBalance;
+            }
+        }
+        
+        // Login system
+        function openLoginModal() {
+            if (isLoggedIn) {
+                logout();
+                return;
+            }
+            document.getElementById('login-modal').classList.add('active');
+        }
+        
+        function performLogin() {
+            const cpf = document.getElementById('login-cpf').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Simple validation for demo
+            if (cpf === '12345678900' || cpf === '123.456.789-00') {
+                if (password === 'senha123') {
+                    isLoggedIn = true;
+                    currentUser = { cpf: cpf, name: 'Usuário Teste' };
+                    closeModal('login-modal');
+                    showNotification('Login realizado com sucesso!', 'success');
+                    
+                    // Update header
+                    const authBtn = document.getElementById('auth-btn');
+                    if (authBtn) {
+                        authBtn.textContent = 'Sair';
+                    }
+                } else {
+                    showNotification('Senha incorreta!', 'error');
+                }
+            } else {
+                showNotification('CPF incorreto! Use: 12345678900', 'error');
+            }
+        }
+        
+        function logout() {
+            isLoggedIn = false;
+            currentUser = null;
+            showNotification('Logout realizado com sucesso!', 'success');
+            
+            // Update header
+            const authBtn = document.getElementById('auth-btn');
+            if (authBtn) {
+                authBtn.textContent = 'Entrar';
+            }
+        }
+        
+        // Deposit system
+        function openDepositModal() {
+            if (!isLoggedIn) {
+                showNotification('Faça login para depositar!', 'warning');
+                openLoginModal();
+                return;
+            }
+            document.getElementById('deposit-modal').classList.add('active');
+        }
+        
+        function setDepositAmount(amount) {
+            document.getElementById('deposit-amount').value = amount;
+            
+            // Update quick amount selection
+            document.querySelectorAll('#deposit-modal .quick-amount').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+        
+        function processDeposit() {
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            const method = document.getElementById('deposit-method').value;
+            
+            if (!amount || amount < 10) {
+                showNotification('Valor mínimo para depósito é R$ 10,00', 'error');
+                return;
+            }
+            
+            if (amount > 10000) {
+                showNotification('Valor máximo para depósito é R$ 10.000,00', 'error');
+                return;
+            }
+            
+            // Simulate deposit processing
+            balance += amount;
+            updateBalance();
+            closeModal('deposit-modal');
+            showNotification(`Depósito de R$ ${amount.toFixed(2)} realizado com sucesso!`, 'success');
+            
+            // Reset form
+            document.getElementById('deposit-amount').value = '';
+            document.querySelectorAll('#deposit-modal .quick-amount').forEach(el => el.classList.remove('selected'));
+        }
+        
+        // Withdrawal system
+        function openWithdrawalModal() {
+            if (!isLoggedIn) {
+                showNotification('Faça login para sacar!', 'warning');
+                openLoginModal();
+                return;
+            }
+            document.getElementById('withdrawal-modal').classList.add('active');
+            updateWithdrawalBalance();
+        }
+        
+        function updateWithdrawalBalance() {
+            const withdrawalBalance = document.getElementById('withdrawal-balance');
+            if (withdrawalBalance) {
+                withdrawalBalance.textContent = `R$ ${balance.toFixed(2).replace('.', ',')}`;
+            }
+        }
+        
+        function updateWithdrawalMethod() {
+            const method = document.getElementById('withdrawal-method').value;
+            
+            // Hide all method fields
+            document.querySelectorAll('.withdrawal-method-fields').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show selected method fields
+            document.getElementById(method + '-fields').style.display = 'block';
+            
+            calculateWithdrawalFee();
+        }
+        
+        function setWithdrawalAmount(amount) {
+            document.getElementById('withdrawal-amount').value = amount;
+            calculateWithdrawalFee();
+            
+            // Update quick amount selection
+            document.querySelectorAll('#withdrawal-modal .quick-amount').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+        
+        function calculateWithdrawalFee() {
+            const amount = parseFloat(document.getElementById('withdrawal-amount').value) || 0;
+            const method = document.getElementById('withdrawal-method').value;
+            
+            let fee = 0;
+            
+            // Calculate fee based on method
+            switch (method) {
+                case 'pix':
+                    fee = Math.max(2, amount * 0.01); // 1% min R$ 2
+                    break;
+                case 'bank':
+                    fee = Math.max(5, amount * 0.015); // 1.5% min R$ 5
+                    break;
+                case 'crypto':
+                    fee = Math.max(10, amount * 0.02); // 2% min R$ 10
+                    break;
+            }
+            
+            const netAmount = Math.max(0, amount - fee);
+            
+            document.getElementById('withdrawal-requested').textContent = `R$ ${amount.toFixed(2)}`;
+            document.getElementById('withdrawal-fee').textContent = `R$ ${fee.toFixed(2)}`;
+            document.getElementById('withdrawal-net').textContent = `R$ ${netAmount.toFixed(2)}`;
+            
+            // Enable/disable withdrawal button
+            const withdrawalBtn = document.getElementById('withdrawal-btn');
+            if (amount >= 20 && amount <= balance && amount <= 10000) {
+                withdrawalBtn.disabled = false;
+                withdrawalBtn.classList.remove('opacity-50');
+            } else {
+                withdrawalBtn.disabled = true;
+                withdrawalBtn.classList.add('opacity-50');
+            }
+        }
+        
+        function processWithdrawal() {
+            const amount = parseFloat(document.getElementById('withdrawal-amount').value);
+            const method = document.getElementById('withdrawal-method').value;
+            
+            if (!amount || amount < 20) {
+                showNotification('Valor mínimo para saque é R$ 20,00', 'error');
+                return;
+            }
+            
+            if (amount > balance) {
+                showNotification('Saldo insuficiente!', 'error');
+                return;
+            }
+            
+            if (amount > 10000) {
+                showNotification('Valor máximo para saque é R$ 10.000,00', 'error');
+                return;
+            }
+            
+            // Validate required fields based on method
+            let isValid = true;
+            let missingField = '';
+            
+            switch (method) {
+                case 'pix':
+                    if (!document.getElementById('pix-key').value) {
+                        isValid = false;
+                        missingField = 'Chave PIX';
+                    }
+                    break;
+                case 'bank':
+                    if (!document.getElementById('bank-name').value || 
+                        !document.getElementById('bank-agency').value || 
+                        !document.getElementById('bank-account').value) {
+                        isValid = false;
+                        missingField = 'dados bancários';
+                    }
+                    break;
+                case 'crypto':
+                    if (!document.getElementById('crypto-address').value) {
+                        isValid = false;
+                        missingField = 'endereço da carteira';
+                    }
+                    break;
+            }
+            
+            if (!isValid) {
+                showNotification(`Preencha todos os ${missingField}!`, 'error');
+                return;
+            }
+            
+            // Calculate fee and net amount
+            let fee = 0;
+            switch (method) {
+                case 'pix':
+                    fee = Math.max(2, amount * 0.01);
+                    break;
+                case 'bank':
+                    fee = Math.max(5, amount * 0.015);
+                    break;
+                case 'crypto':
+                    fee = Math.max(10, amount * 0.02);
+                    break;
+            }
+            
+            const netAmount = amount - fee;
+            
+            // Process withdrawal
+            balance -= amount;
+            updateBalance();
+            
+            // Add to withdrawal history
+            const withdrawal = {
+                id: Date.now(),
+                amount: amount,
+                netAmount: netAmount,
+                fee: fee,
+                method: method,
+                status: 'pending',
+                date: new Date().toLocaleString('pt-BR'),
+                estimatedTime: getEstimatedTime(method)
+            };
+            
+            withdrawalHistory.unshift(withdrawal);
+            updateWithdrawalHistory();
+            
+            // Simulate processing time
+            setTimeout(() => {
+                withdrawal.status = 'completed';
+                updateWithdrawalHistory();
+                showNotification(`Saque de R$ ${netAmount.toFixed(2)} processado com sucesso!`, 'success');
+            }, Math.random() * 5000 + 2000); // 2-7 seconds
+            
+            closeModal('withdrawal-modal');
+            showNotification(`Saque de R$ ${amount.toFixed(2)} solicitado com sucesso!`, 'success');
+            
+            // Reset form
+            document.getElementById('withdrawal-amount').value = '';
+            document.querySelectorAll('.withdrawal-method-fields input').forEach(input => input.value = '');
+            document.querySelectorAll('#withdrawal-modal .quick-amount').forEach(el => el.classList.remove('selected'));
+        }
+        
+        function getEstimatedTime(method) {
+            switch (method) {
+                case 'pix':
+                    return 'Instantâneo';
+                case 'bank':
+                    return '1-2 dias úteis';
+                case 'crypto':
+                    return '5-30 minutos';
+                default:
+                    return 'Processando';
+            }
+        }
+        
+        function updateWithdrawalHistory() {
+            const historyList = document.getElementById('withdrawal-history-list');
+            if (!historyList) return;
+            
+            if (withdrawalHistory.length === 0) {
+                historyList.innerHTML = '<p class="text-gray-400 text-center">Nenhum saque realizado ainda</p>';
+                return;
+            }
+            
+            historyList.innerHTML = withdrawalHistory.slice(0, 5).map(withdrawal => `
+                <div class="history-item">
+                    <div>
+                        <div class="font-medium">R$ ${withdrawal.amount.toFixed(2)}</div>
+                        <div class="text-sm text-gray-400">${getMethodName(withdrawal.method)} - ${withdrawal.date}</div>
+                    </div>
+                    <div class="status-${withdrawal.status}">
+                        <i class="fas fa-${getStatusIcon(withdrawal.status)}"></i> ${getStatusText(withdrawal.status)}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function getMethodName(method) {
+            switch (method) {
+                case 'pix': return 'PIX';
+                case 'bank': return 'Transferência';
+                case 'crypto': return 'Criptomoeda';
+                default: return method;
+            }
+        }
+        
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'pending': return 'clock';
+                case 'completed': return 'check-circle';
+                case 'failed': return 'times-circle';
+                default: return 'clock';
+            }
+        }
+        
+        function getStatusText(status) {
+            switch (status) {
+                case 'pending': return 'Processando';
+                case 'completed': return 'Concluído';
+                case 'failed': return 'Falhou';
+                default: return 'Processando';
+            }
+        }
+        
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // Scroll functions
+        function scrollToGames() {
+            document.getElementById('games').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function scrollToCrash() {
+            document.getElementById('crash').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Show tutorial
+        function showTutorial() {
+            document.getElementById('tutorial-modal').classList.add('active');
+        }
+        
+        function closeTutorial() {
+            document.getElementById('tutorial-modal').classList.remove('active');
+        }
+        
+        // Game modal functions
+        function openGame(gameType) {
+            const modal = document.getElementById(gameType + '-modal');
+            if (modal) {
+                modal.classList.add('active');
+                if (gameType === 'mines') {
+                    generateMinesGrid();
+                } else if (gameType === 'plinko') {
+                    generatePlinkoBoard();
+                }
+            }
+        }
+        
+        function closeGame() {
+            const modals = document.querySelectorAll('.game-modal');
+            modals.forEach(modal => {
+                if (!modal.id.includes('login') && !modal.id.includes('deposit') && !modal.id.includes('withdrawal') && !modal.id.includes('tutorial')) {
+                    modal.classList.remove('active');
+                }
+            });
+        }
+        
+        // Crash Game Functions
+        function startCrashGame() {
+            crashRunning = true;
+            crashGameState = 'running';
+            crashMultiplier = 1.0;
+            const crashPoint = Math.random() * 8 + 1.2; // Random crash between 1.2x and 9.2x
+            
+            document.getElementById('crash-status').textContent = 'Voando...';
+            document.getElementById('crash-current').style.color = '#10b981';
+            
+            const rocket = document.getElementById('crash-rocket');
+            const line = document.getElementById('crash-line');
+            
+            const interval = setInterval(() => {
+                if (crashMultiplier >= crashPoint) {
+                    // Crash!
+                    crashRunning = false;
+                    crashGameState = 'crashed';
+                    document.getElementById('crash-current').textContent = 'CRASHED!';
+                    document.getElementById('crash-current').style.color = '#ef4444';
+                    document.getElementById('crash-last').textContent = crashMultiplier.toFixed(2) + 'x';
+                    document.getElementById('crash-status').textContent = 'Explodiu!';
+                    
+                    // Explosion animation
+                    rocket.style.animation = 'explode 0.5s ease';
+                    rocket.textContent = '💥';
+                    
+                    // Add to history
+                    gameHistory.crash.unshift(crashMultiplier.toFixed(2) + 'x');
+                    if (gameHistory.crash.length > 10) {
+                        gameHistory.crash.pop();
+                    }
+                    
+                    // Reset for next round
+                    setTimeout(() => {
+                        document.getElementById('crash-current').style.color = '#ffffff';
+                        document.getElementById('crash-status').textContent = 'Aguardando...';
+                        rocket.textContent = '🚀';
+                        rocket.style.animation = '';
+                        line.style.transform = 'scaleY(1)';
+                        rocket.style.transform = 'translate(0, 0)';
+                        crashTimer = 15;
+                        startCrashTimer();
+                    }, 3000);
+                    
+                    // Check if player had active bet
+                    if (crashBetActive) {
+                        crashBetActive = false;
+                        document.getElementById('crash-bet-btn').textContent = 'Apostar';
+                        document.getElementById('crash-bet-btn').onclick = placeCrashBet;
+                        showNotification('Você perdeu! O foguete explodiu!', 'error');
+                    }
+                    
+                    clearInterval(interval);
+                    return;
+                }
+                
+                crashMultiplier += 0.01 + (crashMultiplier * 0.001); // Accelerating growth
+                document.getElementById('crash-current').textContent = crashMultiplier.toFixed(2) + 'x';
+                document.getElementById('crash-multiplier').textContent = crashMultiplier.toFixed(2) + 'x';
+                
+                // Update animations
+                const progress = (crashMultiplier - 1) / (crashPoint - 1);
+                line.style.transform = `scaleY(${1 + progress * 5})`;
+                rocket.style.transform = `translate(${progress * 150}px, ${-progress * 100}px) rotate(${progress * 45}deg)`;
+            }, 100);
+        }
+        
+        function startCrashTimer() {
+            crashGameState = 'waiting';
+            const timerInterval = setInterval(() => {
+                crashTimer--;
+                const minutes = Math.floor(crashTimer / 60);
+                const seconds = crashTimer % 60;
+                document.getElementById('crash-timer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (crashTimer <= 0) {
+                    clearInterval(timerInterval);
+                    startCrashGame();
+                }
+            }, 1000);
+        }
+        
+        function placeCrashBet() {
+            const betAmount = parseFloat(document.getElementById('crash-bet').value) || 10;
+            const cashoutMultiplier = parseFloat(document.getElementById('crash-cashout').value) || 2.0;
+            
+            if (betAmount > balance) {
+                showNotification('Saldo insuficiente!', 'error');
+                return;
+            }
+            
+            if (betAmount < 1) {
+                showNotification('Valor mínimo de aposta é R$ 1,00', 'error');
+                return;
+            }
+            
+            if (crashGameState !== 'running') {
+                showNotification('Aguarde o próximo jogo!', 'warning');
+                return;
+            }
+            
+            balance -= betAmount;
+            updateBalance();
+            crashBetActive = true;
+            
+            document.getElementById('crash-bet-btn').textContent = 'Retirar';
+            document.getElementById('crash-bet-btn').onclick = cashoutCrash;
+            
+            showNotification(`Aposta de R$ ${betAmount.toFixed(2)} realizada!`, 'success');
+            
+            // Auto cashout
+            const checkCashout = setInterval(() => {
+                if (crashMultiplier >= cashoutMultiplier && crashBetActive && crashRunning) {
+                    cashoutCrash();
+                    clearInterval(checkCashout);
+                }
+                
+                if (!crashRunning) {
+                    clearInterval(checkCashout);
+                }
+            }, 50);
+        }
+        
+        function cashoutCrash() {
+            if (!crashBetActive || !crashRunning) return;
+            
+            const betAmount = parseFloat(document.getElementById('crash-bet').value) || 10;
+            const winAmount = betAmount * crashMultiplier;
+            
+            balance += winAmount;
+            updateBalance();
+            crashBetActive = false;
+            
+            document.getElementById('crash-bet-btn').textContent = 'Apostar';
+            document.getElementById('crash-bet-btn').onclick = placeCrashBet;
+            
+            showNotification(`Você ganhou R$ ${winAmount.toFixed(2)}! (${crashMultiplier.toFixed(2)}x)`, 'success');
+        }
+        
+        function showCrashHistory() {
+            const history = gameHistory.crash.length > 0 ? gameHistory.crash : [
+                '3.24x', '1.87x', '5.42x', '2.15x', '1.23x',
+                '8.76x', '1.45x', '2.98x', '1.67x', '4.33x'
+            ];
+            showNotification(`Últimos resultados: ${history.slice(0, 5).join(', ')}`, 'success');
+        }
+        
+        // Double Game Functions
+        let doubleBetPlaced = null;
+        let doubleSpinning = false;
+        let doubleSequence = { color: 'red', count: 3 };
+        
+        function placeBet(color) {
+            const betAmount = parseFloat(document.getElementById('double-bet').value) || 10;
+            
+            if (betAmount > balance) {
+                showNotification('Saldo insuficiente!', 'error');
+                return;
+            }
+            
+            if (betAmount < 1) {
+                showNotification('Valor mínimo de aposta é R$ 1,00', 'error');
+                return;
+            }
+            
+            if (doubleSpinning) {
+                showNotification('Aguarde o resultado atual!', 'warning');
+                return;
+            }
+            
+            if (doubleTimer > 10) {
+                showNotification('Apostas fechadas! Aguarde o próximo jogo.', 'warning');
+                return;
+            }
+            
+            balance -= betAmount;
+            updateBalance();
+            doubleBetPlaced = { color, amount: betAmount };
+            
+            // Disable bet buttons
+            document.getElementById('red-bet-btn').disabled = true;
+            document.getElementById('black-bet-btn').disabled = true;
+            
+            showNotification(`Aposta de R$ ${betAmount.toFixed(2)} em ${color === 'red' ? 'vermelho' : 'preto'} realizada!`, 'success');
+        }
+        
+        function spinDoubleWheel() {
+            doubleSpinning = true;
+            doubleGameState = 'spinning';
+            const wheel = document.getElementById('double-wheel');
+            
+            // Determine result with slight bias to break long sequences
+            let result;
+            if (doubleSequence.count >= 5) {
+                // Higher chance to break sequence
+                result = Math.random() < 0.7 ? (doubleSequence.color === 'red' ? 'black' : 'red') : doubleSequence.color;
+            } else {
+                result = Math.random() < 0.48 ? 'red' : 'black'; // Slightly favor black
+            }
+            
+            // Animate wheel
+            const spins = 5 + Math.random() * 3;
+            const baseRotation = spins * 360;
+            const colorOffset = result === 'red' ? Math.random() * 120 : 120 + Math.random() * 120;
+            const finalRotation = baseRotation + colorOffset;
+            
+            wheel.style.transform = `rotate(${finalRotation}deg)`;
+            
+            setTimeout(() => {
+                doubleSpinning = false;
+                doubleGameState = 'result';
+                
+                // Update sequence tracking
+                if (doubleSequence.color === result) {
+                    doubleSequence.count++;
+                } else {
+                    doubleSequence.color = result;
+                    doubleSequence.count = 1;
+                }
+                
+                // Update display
+                document.getElementById('double-last-color').textContent = result === 'red' ? '🔴' : '⚫';
+                document.getElementById('double-sequence').textContent = doubleSequence.count;
+                
+                // Add to history
+                gameHistory.double.unshift(result === 'red' ? '🔴' : '⚫');
+                if (gameHistory.double.length > 10) {
+                    gameHistory.double.pop();
+                }
+                
+                // Check if player won
+                if (doubleBetPlaced && doubleBetPlaced.color === result) {
+                    const winAmount = doubleBetPlaced.amount * 2;
+                    balance += winAmount;
+                    updateBalance();
+                    showNotification(`Você ganhou R$ ${winAmount.toFixed(2)}!`, 'success');
+                } else if (doubleBetPlaced) {
+                    showNotification(`Você perdeu! Saiu ${result === 'red' ? 'vermelho' : 'preto'}`, 'error');
+                }
+                
+                // Reset for next round
+                setTimeout(() => {
+                    doubleBetPlaced = null;
+                    document.getElementById('red-bet-btn').disabled = false;
+                    document.getElementById('black-bet-btn').disabled = false;
+                    doubleTimer = 15;
+                    doubleGameState = 'waiting';
+                }, 2000);
+            }, 3000);
+        }
+        
+        // Mines Game Functions
+        function generateMinesGrid() {
+            const grid = document.getElementById('mines-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'mine-cell';
+                cell.dataset.index = i;
+                cell.onclick = () => revealMineCell(i);
+                grid.appendChild(cell);
+            }
+        }
+        
+        function updateMinesDifficulty() {
+            const difficulty = parseInt(document.getElementById('mines-difficulty').value);
+            document.getElementById('mines-count').textContent = difficulty;
+            
+            if (minesGame) {
+                resetMinesGame();
+            }
+        }
+        
+        function startMines() {
+            const betAmount = parseFloat(document.getElementById('mines-bet').value) || 10;
+            const mineCount = parseInt(document.getElementById('mines-difficulty').value);
+            
+            if (betAmount > balance) {
+                showNotification('Saldo insuficiente!', 'error');
+                return;
+            }
+            
+            if (betAmount < 1) {
+                showNotification('Valor mínimo de aposta é R$ 1,00', 'error');
+                return;
+            }
+            
+            balance -= betAmount;
+            updateBalance();
+            
+            // Initialize game
+            minesGame = {
+                betAmount: betAmount,
+                mineCount: mineCount,
+                mines: generateMinePositions(mineCount),
+                revealed: [],
+                multiplier: 1.0,
+                active: true
+            };
+            
+            document.getElementById('mines-start-btn').style.display = 'none';
+            document.getElementById('mines-cashout-btn').style.display = 'block';
+            
+            showNotification('Jogo iniciado! Clique nas células para revelar diamantes!', 'success');
+        }
+        
+        function generateMinePositions(count) {
+            const positions = [];
+            while (positions.length < count) {
+                const pos = Math.floor(Math.random() * 25);
+                if (!positions.includes(pos)) {
+                    positions.push(pos);
+                }
+            }
+            return positions;
+        }
+        
+        function revealMineCell(index) {
+            if (!minesGame || !minesGame.active || minesGame.revealed.includes(index)) {
+                return;
+            }
+            
+            const cell = document.querySelector(`[data-index="${index}"]`);
+            minesGame.revealed.push(index);
+            
+            if (minesGame.mines.includes(index)) {
+                // Hit a mine!
+                cell.classList.add('mine');
+                cell.textContent = '💣';
+                minesGame.active = false;
+                
+                // Reveal all mines with delay
+                minesGame.mines.forEach((mineIndex, i) => {
+                    setTimeout(() => {
+                        const mineCell = document.querySelector(`[data-index="${mineIndex}"]`);
+                        if (mineCell && !mineCell.classList.contains('mine')) {
+                            mineCell.classList.add('mine');
+                            mineCell.textContent = '💣';
+                        }
+                    }, i * 200);
+                });
+                
+                showNotification('Você acertou uma mina! Jogo perdido!', 'error');
+                
+                setTimeout(() => {
+                    resetMinesGame();
+                }, 2000);
+            } else {
+                // Found a diamond!
+                cell.classList.add('revealed');
+                cell.textContent = '💎';
+                
+                // Calculate new multiplier based on revealed gems and difficulty
+                const safeSpots = 25 - minesGame.mineCount;
+                const revealedSafe = minesGame.revealed.length;
+                const baseMultiplier = 1 + (revealedSafe * 0.1);
+                const difficultyBonus = minesGame.mineCount * 0.05;
+                minesGame.multiplier = baseMultiplier + (revealedSafe * difficultyBonus);
+                
+                document.getElementById('mines-multiplier').textContent = minesGame.multiplier.toFixed(2) + 'x';
+                document.getElementById('mines-potential').textContent = 
+                    `R$ ${(minesGame.betAmount * minesGame.multiplier).toFixed(2)}`;
+                
+                showNotification('Diamante encontrado!', 'success');
+                
+                // Check if all safe spots are revealed
+                if (revealedSafe === safeSpots) {
+                    showNotification('Parabéns! Você encontrou todos os diamantes!', 'success');
+                    setTimeout(() => {
+                        cashoutMines();
+                    }, 1000);
+                }
+            }
+        }
+        
+        function cashoutMines() {
+            if (!minesGame || !minesGame.active) return;
+            
+            const winAmount = minesGame.betAmount * minesGame.multiplier;
+            balance += winAmount;
+            updateBalance();
+            
+            showNotification(`Você retirou R$ ${winAmount.toFixed(2)}!`, 'success');
+            resetMinesGame();
+        }
+        
+        function resetMinesGame() {
+            minesGame = null;
+            document.getElementById('mines-start-btn').style.display = 'block';
+            document.getElementById('mines-cashout-btn').style.display = 'none';
+            document.getElementById('mines-multiplier').textContent = '1.00x';
+            document.getElementById('mines-potential').textContent = 'R$ 10,00';
+            generateMinesGrid();
+        }
+        
+        // Dice Game Functions
+        function updateDiceStats() {
+            const target = parseInt(document.getElementById('dice-target').value);
+            document.getElementById('dice-target-value').textContent = target;
+            document.getElementById('dice-target-display').textContent = target;
+            document.getElementById('dice-target-display2').textContent = target;
+            
+            const overChance = (100 - target) / 100;
+            const underChance = (target - 1) / 100;
+            const overMultiplier = 0.98 / overChance;
+            const underMultiplier = 0.98 / underChance;
+            
+            // Display the higher multiplier
+            const displayMultiplier = Math.max(overMultiplier, underMultiplier);
+            document.getElementById('dice-multiplier').textContent = displayMultiplier.toFixed(2) + 'x';
+            
+            // Display the better chance
+            const displayChance = Math.max(overChance, underChance);
+            document.getElementById('dice-chance').textContent = (displayChance * 100).toFixed(1) + '%';
+        }
+        
+        function rollDice(type) {
+            const betAmount = parseFloat(document.getElementById('dice-bet').value) || 10;
+            const target = parseInt(document.getElementById('dice-target').value);
+            
+            if (betAmount > balance) {
+                showNotification('Saldo insuficiente!', 'error');
+                return;
+            }
+            
+            if (betAmount < 1) {
+                showNotification('Valor mínimo de aposta é R$ 1,00', 'error');
+                return;
+            }
+            
+            balance -= betAmount;
+            updateBalance();
+            
+            // Disable buttons during roll
+            document.getElementById('dice-over-btn').disabled = true;
+            document.getElementById('dice-under-btn').disabled = true;
+            
+            const dice = document.getElementById('dice-result');
+            dice.classList.add('rolling');
+            dice.textContent = '?';
+            
+            // Show rolling animation for longer
+            let rollCount = 0;
+            const rollInterval = setInterval(() => {
+                dice.textContent = Math.floor(Math.random() * 100) + 1;
+                rollCount++;
+                
+                if (rollCount >= 10) {
+                    clearInterval(rollInterval);
+                    
+                    const result = Math.floor(Math.random() * 100) + 1;
+                    dice.textContent = result;
+                    dice.classList.remove('rolling');
+                    
+                    document.getElementById('dice-last').textContent = result;
+                    
+                    let won = false;
+                    let multiplier = 1;
+                    
+                    if (type === 'over' && result > target) {
+                        won = true;
+                        multiplier = 0.98 / ((100 - target) / 100);
+                    } else if (type === 'under' && result < target) {
+                        won = true;
+                        multiplier = 0.98 / ((target - 1) / 100);
+                    }
+                    
+                    if (won) {
+                        const winAmount = betAmount * multiplier;
+                        balance += winAmount;
+                        showNotification(`Você ganhou R$ ${winAmount.toFixed(2)}! (${multiplier.toFixed(2)}x)`, 'success');
+                    } else {
+                        showNotification(`Você perdeu! Resultado: ${result}`, 'error');
+                    }
+                    
+                    updateBalance();
+                    
+                    // Re-enable buttons
+                    document.getElementById('dice-over-btn').disabled = false;
+                    document.getElementById('dice-under-btn').disabled = false;
+                }
+            }, 100);
+        }
+        
+        // Plinko Game Functions
+        function generatePlinkoBoard() {
+            const board = document.getElementById('plinko-board');
+            // Clear existing pegs
+            const existingPegs = board.querySelectorAll('.plinko-peg');
+            existingPegs.forEach(peg => peg.remove());
+            
+            // Add pegs in a more realistic pattern
+            for (let row = 0; row < 14; row++) {
+                const pegsInRow = row + 3;
+                for (let col = 0; col < pegsInRow; col++) {
+                    const peg = document.createElement('div');
+                    peg.className = 'plinko-peg';
+                    const xOffset = (320 - (pegsInRow * 20)) / 2;
+                    peg.style.left = `${xOffset + col * 20}px`;
+                    peg.style.top = `${20 + row * 25}px`;
+                    board.appendChild(peg);
+                }
+            }
+        }
+        
+        function dropPlinko() {
+            const betAmount = parseFloat(document.getElementById('plinko-bet').value) || 1;
+            
+            if (betAmount > balance) {
+                showNotification('Saldo insuficiente!', 'error');
+                return;
+            }
+            
+            if (betAmount < 1) {
+                showNotification('Valor mínimo de aposta é R$ 1,00', 'error');
+                return;
+            }
+            
+            balance -= betAmount;
+            updateBalance();
+            
+            // Disable drop button during animation
+            document.getElementById('plinko-drop-btn').disabled = true;
+            
+            // Create and animate ball
+            const ball = document.createElement('div');
+            ball.className = 'plinko-ball';
+            ball.style.left = '152px'; // Center of board
+            ball.style.top = '10px';
+            
+            const board = document.getElementById('plinko-board');
+            board.appendChild(ball);
+            
+            // Simulate realistic ball physics
+            let position = { x: 152, y: 10 };
+            let velocity = { x: 0, y: 0 };
+            const gravity = 0.5;
+            const bounce = 0.7;
+            
+            const animationInterval = setInterval(() => {
+                velocity.y += gravity;
+                position.x += velocity.x;
+                position.y += velocity.y;
+                
+                // Simple collision detection with pegs
+                if (Math.random() < 0.3 && position.y > 50) {
+                    velocity.x += (Math.random() - 0.5) * 4;
+                    velocity.x *= bounce;
+                }
+                
+                // Keep ball in bounds
+                if (position.x < 8) {
+                    position.x = 8;
+                    velocity.x = Math.abs(velocity.x);
+                }
+                if (position.x > 304) {
+                    position.x = 304;
+                    velocity.x = -Math.abs(velocity.x);
+                }
+                
+                ball.style.left = position.x + 'px';
+                ball.style.top = position.y + 'px';
+                
+                // Check if ball reached bottom
+                if (position.y > 350) {
+                    clearInterval(animationInterval);
+                    
+                    // Determine which slot the ball landed in
+                    const slotWidth = 320 / 11;
+                    const slotIndex = Math.floor(position.x / slotWidth);
+                    const slots = [0.2, 0.5, 1, 2, 5, 10, 5, 2, 1, 0.5, 0.2];
+                    const multiplier = slots[Math.min(slotIndex, slots.length - 1)];
+                    const winAmount = betAmount * multiplier;
+                    
+                    balance += winAmount;
+                    updateBalance();
+                    
+                    // Highlight winning slot
+                    const slotElements = board.querySelectorAll('.plinko-slot');
+                    if (slotElements[slotIndex]) {
+                        slotElements[slotIndex].style.backgroundColor = '#10b981';
+                        setTimeout(() => {
+                            slotElements[slotIndex].style.backgroundColor = '';
+                        }, 2000);
+                    }
+                    
+                    showNotification(`Bola caiu no slot ${multiplier}x! Você ganhou R$ ${winAmount.toFixed(2)}!`, 'success');
+                    
+                    // Remove ball
+                    setTimeout(() => {
+                        ball.remove();
+                    }, 1000);
+                    
+                    // Update total
+                    const currentTotal = parseFloat(document.getElementById('plinko-total').textContent.replace('R$ ', '').replace(',', '.')) || 0;
+                    document.getElementById('plinko-total').textContent = `R$ ${(currentTotal + winAmount - betAmount).toFixed(2)}`;
+                    
+                    // Re-enable drop button
+                    document.getElementById('plinko-drop-btn').disabled = false;
+                }
+            }, 50);
+        }
+        
+        // Promotion functions
+        function showPromotion(type) {
+            if (type === 'bonus') {
+                showNotification('Promoção de bônus! Deposite R$ 100 e ganhe R$ 100 extra!', 'success');
+            }
+        }
+        
+        function showRanking() {
+            showNotification('Ranking Semanal: 1. Jogador*** - 15.420 pontos, 2. Usuário*** - 12.890 pontos, 3. Player*** - 11.250 pontos', 'success');
+        }
+        
+        // Format CPF input
+        function formatCPF(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            input.value = value;
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBalance();
+            updateDiceStats();
+            startCrashTimer();
+            
+            // Format CPF input
+            const cpfInput = document.getElementById('login-cpf');
+            if (cpfInput) {
+                cpfInput.addEventListener('input', function(e) {
+                    formatCPF(e.target);
+                });
+            }
+            
+            // Start double timer
+            setInterval(() => {
+                if (doubleGameState === 'waiting') {
+                    if (doubleTimer > 0) {
+                        doubleTimer--;
+                        const doubleTimerEl = document.getElementById('double-timer');
+                        if (doubleTimerEl) {
+                            doubleTimerEl.textContent = doubleTimer + 's';
+                        }
+                    } else {
+                        spinDoubleWheel();
+                    }
+                }
+            }, 1000);
+            
+            // Animate player counts
+            setInterval(() => {
+                const playerCounts = document.querySelectorAll('[id$="-players"]');
+                playerCounts.forEach(el => {
+                    const current = parseInt(el.textContent);
+                    const change = Math.floor(Math.random() * 20) - 10;
+                    const newCount = Math.max(100, current + change);
+                    el.textContent = newCount + ' jogadores';
+                });
+            }, 8000);
+            
+            // Initialize withdrawal method
+            updateWithdrawalMethod();
+            
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('game-modal')) {
+                    e.target.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+    <!-- Footer -->
+    <footer class="sblr-secondary py-12 px-4">
+        <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="col-span-2 md:col-span-1">
+                <h3 class="text-xl font-bold mb-4">SBLCorporation</h3>
+                <p class="text-gray-400">A plataforma de apostas mais confiável e divertida.</p>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">Jogos</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#crash" class="hover:text-white transition">Crash</a></li>
+                    <li><a href="#double" class="hover:text-white transition">Double</a></li>
+                    <li><a href="#mines" class="hover:text-white transition">Mines</a></li>
+                    <li><a href="#dice" class="hover:text-white transition">Dice</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">Sobre</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white transition">Termos de Serviço</a></li>
+                    <li><a href="#" class="hover:text-white transition">Política de Privacidade</a></li>
+                    <li><a href="#" class="hover:text-white transition">FAQ</a></li>
+                    <li><a href="#" class="hover:text-white transition">Suporte</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">Pagamentos</h4>
+                <div class="flex space-x-4 text-2xl text-gray-400">
+                    <i class="fab fa-pix"></i>
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fas fa-barcode"></i>
+                    <i class="fab fa-bitcoin"></i>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto mt-8 pt-8 border-t border-gray-700 text-center text-gray-500">
+            <p>&copy; 2025 SBLRush. Todos os direitos reservados.</p>
+            <p>Jogue com responsabilidade. Apostas podem causar dependência.</p>
+            <p class="mt-2">Feito por: Bernardo Guidas</p>
+        </div>
+    </footer>
+</body>
+</html>
+

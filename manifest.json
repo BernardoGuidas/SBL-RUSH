@@ -1,7 +1,7 @@
 {
   "name": "SBLRUSH App",
   "short_name": "SBLRUSH",
-  "start_url": "sbl.rush.com.br.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#cc0000",
